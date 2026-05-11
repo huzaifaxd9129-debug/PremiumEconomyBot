@@ -115,6 +115,38 @@ balance, daily, work, beg, deposit, withdraw, send, gamble, steal, leaderboard
       return message.channel.send(`🦹 Stole ${amount}`);
     }
 
+    if (cmd === "addmoney") {
+
+  // ===== ADMIN ONLY CHECK =====
+  if (!message.member.permissions.has("Administrator")) {
+    return message.reply("❌ You need Administrator permission to use this command.");
+  }
+
+  const user = message.mentions.users.first();
+  if (!user) {
+    return message.reply("❌ Please mention a user.\nExample: `!addmoney @user 1000`");
+  }
+
+  const amount = parseInt(args[1]);
+  if (!amount || isNaN(amount) || amount <= 0) {
+    return message.reply("❌ Please provide a valid amount.");
+  }
+
+  // ===== INIT USER IF NOT EXIST =====
+  if (!db[user.id]) {
+    db[user.id] = { cash: 0, bank: 0 };
+  }
+
+  // ===== ADD MONEY =====
+  db[user.id].cash += amount;
+
+  saveDB(); // make sure you already have this function
+
+  return message.channel.send(
+    `💰 Successfully added **${amount}$** to ${user.username}'s cash!`
+  );
+}
+
     // ================= LEADERBOARD =================
     if (cmd === "leaderboard") {
       const top = await Eco.find().sort({ cash: -1 }).limit(5);
